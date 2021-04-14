@@ -1,0 +1,51 @@
+.todoList-mid-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.todoList-bg-primary {
+    background-color: #fbc531;
+}
+
+.todoList-bg-dark {
+    background-color: #1e272e;
+}
+
+.todoList-colour-dark {
+    color: #1e272e;
+}
+
+.todoList-colour-light {
+    color: #ecf0f1
+}
+
+.todoList-radius-10 {
+    border-radius: 10px;
+}
+
+.todoList-margin-10 {
+    margin: 10px;
+}
+
+.todoList-margin-50 {
+    margin: 50px;
+}
+
+.todoList-mt-150 {
+    margin-top: 150px;
+}
+
+.todoList-padding-10 {
+    padding: 10px;
+}
+
+.todoList-link-text {
+    color: inherit;
+    text-decoration: none;
+}
+
+.todoList-link-text:hover {
+    color: inherit;
+    text-decoration: none;
+}
