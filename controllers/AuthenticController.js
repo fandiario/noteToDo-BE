@@ -8,6 +8,9 @@ const handlebars = require ("handlebars")
 // Import Hash Password
 const hashPassword = require ("./../helpers/Hash")
 
+// Import New Password
+const newPassword = require ("./../helpers/NewPassword")
+
 // Import Connection
 const db = require ("../connection/Connection")
 
@@ -80,13 +83,13 @@ const register = (req, res) => {
                                 
                                     .then ((response) => {
                                         res.status(200).send({
-                                            error: true,
+                                            error: false,
                                             message: "Data register is success. Please check your email for activation"
                                         }) 
                                     })
                                 
                                     .catch ((err) => {
-                                        console.log ("Test")
+                                        // console.log ("Test")
                                         res.status(500).send({
                                             error: true,
                                             message: err.message
@@ -176,7 +179,7 @@ const login = (req, res) => {
                     //     message: "Login is Success"
                     // })
 
-                    jwt.sign ({id: result[0].id, email: result[0].email, password: result[0].password, is_email_confirmed: result[0].is_email_confirmed}, "123abc", (err, token) => {
+                    jwt.sign ({id: result[0].id, activation_code: result[0].activation_code, created_at: result[0].created_at}, "123abc", (err, token) => {
                         try {
                             res.status (200).send ({
                                 error: false,
@@ -222,6 +225,8 @@ const login = (req, res) => {
 // Email Confirmation
 const emailConfirmation = (req, res) => {
     const data = req.body
+    // const idInput = data.id
+    // const passInput = `'${data.password}'`
     const idInput = data.dataToSend.id
     const passInput = `'${data.dataToSend.password}'`
     console.log (idInput)
@@ -231,14 +236,14 @@ const emailConfirmation = (req, res) => {
     db.query (queryCheck, (err, result) => {
         try {
             if (err) throw err
-
+            // console.log (res)
             if (result[0].is_email_confirmed === 0) {
                 let queryConfirm = `UPDATE users SET is_email_confirmed = 1 WHERE id = ${idInput} AND password = ${passInput}`
                 
                 db.query(queryConfirm, (err, result) => {
                     try {
                         if (err) throw err
-
+                        
                         res.status(200).send ({
                             error: false,
                             message: "Congratulation. Your Account is now active."
@@ -268,9 +273,138 @@ const emailConfirmation = (req, res) => {
     })
 }
 
+// Forgot Password
+const forgotPassword = (req, res) => {
+    try {
+        const data = req.body
+        const inputEmail = data.inputEmail
+        console.log (inputEmail)
+
+        data.password = newPassword ()
+        let newPass = data.password
+        
+        let newPassHashed = hashPassword(data.password)
+        data.password = newPassHashed
+        // console.log (inputEmail)
+
+        let queryCheck = `SELECT * FROM users WHERE email = '${inputEmail}'`
+        db.query (queryCheck, (err, result) => {
+            console.log ("check1")
+            try {
+                if (err) throw err
+
+                if (result.length === 1){
+                    // Patch password
+                    let queryPatch = `UPDATE users SET password = '${data.password}' WHERE email = '${inputEmail}'`
+                    db.query (queryPatch, (err, result) => {
+                        console.log ("check2")
+                        try {
+                            if (err) throw err
+                            
+                            fs.readFile ("D:/Data/Purwadhika/JCWM1602/Modul-03/02.W-02/01.Day-01/Project-NoteToDo/Authentic_System/template/forgotPassword.html", {encoding: "utf-8"}, (err, file) => {
+                                if (err) throw err
+
+                                const template = handlebars.compile (file)
+                                const templateRes = template ({email: data.inputEmail, newPassword: newPass})
+
+                                transporter.sendMail ({
+                                    from: "fandi.ario10@gmail.com",
+                                    to:"fandi.ario10@gmail.com",
+                                    // to: data.email,
+                                    subject: "New Password Request",
+                                    html: templateRes
+                                })
+
+                                .then ((response) => {
+                                    res.status (200).send ({
+                                        error: false,
+                                        message: "New Password has been sent to your email."
+                                    })
+                                })
+
+                                .catch ((err) => {
+                                    res.status (500).send ({
+                                        error: true,
+                                        message: err.message
+                                    })
+                                })
+                            })
+
+
+                        } catch (error) {
+                            res.status(500).send({
+                                error: true,
+                                message: error.message
+                            })
+                        }
+                    })
+                } else {
+                    res.status(200).send({
+                        error: true,
+                        message: "Invalid Email"
+                    })
+                }
+
+
+            } catch (error) {
+                res.status(500).send({
+                    error: true,
+                    message: error.message
+                }) 
+            }
+        })
+
+
+    } catch (error) {
+        res.status(406).send ({
+            error: true,
+            message: error.message
+        })   
+    }
+}
+
+// Get Data User From Token
+const getUserData = (req, res) => {
+    let data = req.body
+    // console.log (data.inputToken)
+
+    jwt.verify (data.inputToken, "123abc", (err, data) => {
+        // console.log (data.id)
+        try {
+            if (err) throw err
+
+            let queryGetData = `SELECT * FROM users WHERE id = ${data.id}`
+            db.query (queryGetData, (err, result) => {
+                try {
+                    if (err) throw err
+                    
+                    res.status(200).send ({
+                        error: false,
+                        dataUser: result[0] 
+                    })
+                    
+                } catch (error) {
+                    res.status(500).send({
+                        error: true,
+                        message: error.message
+                    })  
+                }
+            })
+            
+        } catch (error) {
+            res.status(500).send({
+                error: true,
+                message: error.message
+            })  
+        }
+    })
+}
+
 module.exports = {
     register: register,
     testEmail: testEmail,
     login: login,
-    emailConfirmation: emailConfirmation
+    emailConfirmation: emailConfirmation,
+    forgotPassword: forgotPassword,
+    getUserData: getUserData
 }
