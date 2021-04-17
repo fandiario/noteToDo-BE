@@ -365,37 +365,26 @@ const forgotPassword = (req, res) => {
 
 // Get Data User From Token
 const getUserData = (req, res) => {
-    let data = req.body
-    // console.log (data.inputToken)
+    let data = req.dataToken
+    // console.log (data.token)
+    // console.log (data.id)
 
-    jwt.verify (data.inputToken, "123abc", (err, data) => {
-        // console.log (data.id)
+    let queryGetData = `SELECT * FROM users WHERE id = ${data.id}`
+    db.query (queryGetData, (err, result) => {
         try {
             if (err) throw err
 
-            let queryGetData = `SELECT * FROM users WHERE id = ${data.id}`
-            db.query (queryGetData, (err, result) => {
-                try {
-                    if (err) throw err
-                    
-                    res.status(200).send ({
-                        error: false,
-                        dataUser: result[0] 
-                    })
-                    
-                } catch (error) {
-                    res.status(500).send({
-                        error: true,
-                        message: error.message
-                    })  
-                }
+            res.status(200).send ({
+                error: false,
+                // message: 'check'
+                dataUser: result[0] 
             })
-            
+
         } catch (error) {
             res.status(500).send({
                 error: true,
                 message: error.message
-            })  
+            }) 
         }
     })
 }

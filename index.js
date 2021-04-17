@@ -5,6 +5,7 @@ const cors = require ("cors")
 
 // Import Router
 const authenticRouter = require ("./routers/AuthenticRouter")
+const todoRouter = require ("./routers/TodoRouter")
 
 // Init Cors
 const app = express()
@@ -26,6 +27,7 @@ app.get ("/", (req, res) => {
 
     // Router
 app.use("/authentic-system", authenticRouter)
+app.use ("/todo", todoRouter)
 
 
 
