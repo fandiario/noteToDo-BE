@@ -113,12 +113,56 @@ const getDataTask = (req, res) => {
     })
 }
 
-const updateTaskDone = () => {
+const updateTaskDone = (req, res) => {
+    const idTask = req.body.id
+    // console.log (idTask)
+
+    let queryUpdateDone = `UPDATE tasks SET status = 1 WHERE id = ${idTask}`
+    db.query(queryUpdateDone, (err, result) => {
+        try {
+            if (err) throw err
+
+            res.status (200).send ({
+                error: false,
+                message: "Your task status has been updated into Done"
+            })
+            
+        } catch (error) {
+            res.status (500).send ({
+                error: true,
+                message: error.message
+            })
+        }
+    })
+}
+
+const deleteTask = (req, res) => {
+    const idTask = req.body.id
+    // console.log (req.body)
+
+    let queryDelete = `DELETE FROM tasks WHERE id = ${idTask}`
+    db.query (queryDelete, (err, result) => {
+        try {
+            if (err) throw err
+
+            res.status (200).send ({
+                error: false,
+                message: "Your task has been deleted"
+            })
+            
+        } catch (error) {
+            res.status (500).send ({
+                error: true,
+                message: error.message
+            })
+        }
+    })
 
 }
 
 module.exports = {
     createTask: createTask,
     getDataTask: getDataTask,
-    updateTaskDone: updateTaskDone
+    updateTaskDone: updateTaskDone,
+    deleteTask: deleteTask
 }
