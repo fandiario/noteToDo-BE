@@ -84,7 +84,7 @@ const register = (req, res) => {
                                     .then ((response) => {
                                         res.status(200).send({
                                             error: false,
-                                            message: "Data register is success. Please check your email for activation"
+                                            message: "User registration is success. Please check your email in 1 x 24 hours"
                                         }) 
                                     })
                                 
@@ -273,6 +273,61 @@ const emailConfirmation = (req, res) => {
     })
 }
 
+// Email Confirmation Code
+const emailConfirmationCode = (req, res) => {
+    const data = req.body
+
+    const idInput = data.dataToSend.id
+    const passInput = `'${data.dataToSend.password}'`
+    const codeInput = data.dataToSend.confirmationCode
+
+    let queryCheck = `SELECT * FROM users WHERE id = ${idInput} AND password = ${passInput} AND activation_code = ${codeInput}`
+    db.query (queryCheck, (err, result) => {
+        try {
+            if (err) throw err
+
+            if (result[0].is_email_confirmed === 0){
+                let queryConfirm = `UPDATE users SET is_email_confirmed = 1 WHERE id = ${idInput} AND password = ${passInput}`
+
+                db.query (queryConfirm, (err, result) => {
+                    try {
+                        if (err) throw err
+
+                        res.status (200).send ({
+                            error: false,
+                            message: "Congratulation. Your Account is now active."
+                        })
+                        
+                    } catch (error) {
+                        res.status (500).send ({
+                            error: true,
+                            message: error.message
+                        })
+                    }
+                })
+
+
+
+            } else {
+                res.status (200).send ({
+                    error: true,
+                    message: "Your Account is already active."
+                })
+            }
+
+            
+        } catch (error) {
+            res.status(500).send ({
+                error: true,
+                message: error.message
+            })
+        }
+    })
+
+}
+
+
+
 // Forgot Password
 const forgotPassword = (req, res) => {
     try {
@@ -394,6 +449,7 @@ module.exports = {
     testEmail: testEmail,
     login: login,
     emailConfirmation: emailConfirmation,
+    emailConfirmationCode: emailConfirmationCode,
     forgotPassword: forgotPassword,
     getUserData: getUserData
 }

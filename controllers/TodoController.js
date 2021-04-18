@@ -100,7 +100,7 @@ const getDataTask = (req, res) => {
 
             res.status (200).send ({
                 error: false,
-                message: "Get Data successfully",
+                message: "Get Data is success",
                 data: resultTask
             })
             
@@ -160,9 +160,83 @@ const deleteTask = (req, res) => {
 
 }
 
+const getDataPerTask = (req, res) => {
+    let data = req.body
+    let idTask = data.id
+
+    let queryGet = `SELECT * FROM tasks WHERE id = ${idTask}`
+    db.query(queryGet, (err, result) => {
+
+        try {
+            if (err) throw err
+
+            if (result[0]){
+                res.status (200).send ({
+                    error: false,
+                    message: "Get Data is success",
+                    data: result[0]
+                })
+
+            } else {
+                res.status (200).send ({
+                    error: true,
+                    message: "Data is not found or invalid id Task",
+                })
+            }
+            
+        } catch (error) {
+            res.status (500).send ({
+                error: true,
+                message: error.message
+            })
+        }
+    })
+}
+
+const updateTask = (req, res) => {
+    let data = req.body
+    console.log (data)
+
+    let idTask = data.id
+    let titleTask = data.title
+    let descTask = data.description
+    let dateTask = data.date
+
+    try {
+        if (!titleTask || !descTask || !dateTask) throw ({message: "Empty data field detected"})
+
+        let queryUpdate = `UPDATE tasks SET title = '${titleTask}', description = '${descTask}', date = '${dateTask}' WHERE id = ${idTask}`
+        db.query (queryUpdate, (err, result) => {
+            try {
+                if (err) throw err
+                
+                res.status (200).send ({
+                    error: false,
+                    message: "Your task has been updated"
+                })
+
+            } catch (error) {
+                res.status (500).send ({
+                    error: true,
+                    message: error.message
+                })
+            }
+        })
+
+        
+    } catch (error) {
+        res.status (400).send ({
+            error: true,
+            message: error.message
+        })
+    }
+}
+
 module.exports = {
     createTask: createTask,
     getDataTask: getDataTask,
     updateTaskDone: updateTaskDone,
-    deleteTask: deleteTask
+    deleteTask: deleteTask,
+    getDataPerTask: getDataPerTask,
+    updateTask: updateTask
 }

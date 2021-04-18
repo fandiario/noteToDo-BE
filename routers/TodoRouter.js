@@ -13,5 +13,8 @@ Router.post ("/get-data-task",jwtVerify, TodoController.getDataTask)
 Router.patch ("/update-task-done", TodoController.updateTaskDone)
 Router.post ("/delete-task", TodoController.deleteTask)
 
+Router.post ("/get-data-per-task", TodoController.getDataPerTask)
+Router.patch ("/update-task", TodoController.updateTask)
+
 
 module.exports = Router
